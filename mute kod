@@ -1,0 +1,43 @@
+// Mute Sistemi By solo
+
+
+var playerList = {};
+
+room.onPlayerJoin = function(player){
+  playerList[player.id] = { name: player.name, auth: player.auth, conn: player.conn, muted: false };
+}
+
+room.onPlayerChat = function(player,message){
+  
+  if (message.startsWith("!")) {
+    message = message.substr(1);
+    let args = message.split(" ");
+  
+  if(args[0] == "mute" && player.admin){
+    let mutelenecek = Number(args[1]);
+    let mutesuresi = args[2];
+    let sure = mutesuresi * 60000
+    playerList[mutelenecek].muted = true;
+    setTimeout(() => {
+      playerList[mutelenecek].muted = false;
+      room.sendAnnouncement(mutelenecek+" ID'li oyuncu Artık Konuşabilir!")
+    }, sure);
+    room.sendAnnouncement(mutelenecek+" Id'li oyuncu "+(sure / 60000)+" Dakika Susturuldu!");
+    return false;
+  }else if(args[0] == "unmute" && player.admin){
+    let mutelenecek1 = args[1]
+    playerList[mutelenecek1].muted = false;
+    room.sendAnnouncement(mutelenecek1+" ID'li oyuncunun Artık Konuşabilir!")
+    return false;
+  }
+}if(player.admin == false && !playerList[player.id].muted){
+    room.sendAnnouncement("|#"+player.id+"| "+player.name +": "+ message, null, 0xFFFFFF, 'normal', 1);
+    return false;
+    }if(player.admin == true && !playerList[player.id].muted){
+      room.sendAnnouncement("|Admin #"+player.id+"| "+player.name +": "+ message, null, 0xFFFFFF, 'normal', 1);
+      return false;
+      }if(playerList[player.id].muted == true){
+        room.sendAnnouncement("Admin Tarafından Susturuldun ("+player.name+")",player.id);
+        return false;
+      }
+}
